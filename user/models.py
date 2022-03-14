@@ -97,18 +97,25 @@ class User(AbstractUser):
 
     def _generate_jwt_token(self):
         """
-        Generates a JSON Web Token that stores this user's ID and has an expiry
-        date set to 60 days into the future.
+        Generates a JSON Web Tokens that stores this user's ID and has an expiry
+        date set to 5 minutes into the future. refresh token expiry set to 7 days into the future
         """
-        dt = datetime.now() + timedelta(days=60)
+        dt_access = datetime.now() + timedelta(minutes=5)
 
-        token = jwt.encode({
+        access_token = jwt.encode({
             'id': self.pk,
-            'exp': int(dt.strftime('%s')),
+            'exp': int(dt_access.strftime('%s')),
             'iat': datetime.now(),
         }, settings.SECRET_KEY, algorithm='HS256')
 
-        return token
+        dt_refresh = datetime.now() + timedelta(days=7)
+        refresh_token = jwt.encode({
+            'id': self.pk,
+            'exp': int(dt_refresh.strftime('%s')),
+            'iat': datetime.now(),
+        }, settings.SECRET_KEY, algorithm='HS256')
+
+        return {'access_token': access_token, 'refresh_token': refresh_token}
 
     class Meta:
         verbose_name = 'User'

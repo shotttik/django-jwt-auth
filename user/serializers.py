@@ -18,7 +18,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
 
-        fields = ['email', 'password']
+        fields = ['email', 'password']  # add token
 
     def create(self, validate_data):
         return User.objects.create_user(**validate_data)
@@ -27,7 +27,8 @@ class RegistrationSerializer(serializers.ModelSerializer):
 class LoginSerializer(serializers.Serializer):
     email = serializers.CharField(max_length=255)
     password = serializers.CharField(max_length=128, write_only=True)
-    token = serializers.CharField(max_length=255, read_only=True)
+    access_token = serializers.CharField(max_length=255, read_only=True)
+    refresh_token = serializers.CharField(max_length=255, read_only=True)
 
     def validate(self, data):
 
@@ -58,7 +59,7 @@ class LoginSerializer(serializers.Serializer):
 
         return {
             'email': user.email,
-            'token': user.token,
+            **user.token,
         }
 
 
@@ -71,9 +72,9 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('email', 'password', 'token',)
+        fields = ('email', 'password', 'access_token',)
 
-        read_only_fields = ('token',)
+        read_only_fields = ('access_token',)
 
     def update(self, instance, validate_data):
         # Passwords should not be handled with `setattr`, unlike other fields.

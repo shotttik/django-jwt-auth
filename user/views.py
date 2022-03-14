@@ -36,7 +36,13 @@ class LoginAPIView(APIView):
         serializer = self.serializer_class(data=user)
         serializer.is_valid(raise_exception=True)
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        response = Response()
+        response.set_cookie(key='access_token', value=serializer.data["access_token"], httponly=True)
+        response.set_cookie(key='refresh_token', value=serializer.data["refresh_token"], httponly=True)
+        response.data = serializer.data
+        response.status = status.HTTP_200_OK
+
+        return response
 
 
 class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
