@@ -18,8 +18,6 @@ class RegistrationAPIView(APIView):
 
     def post(self, request):
         user = request.data.get('user', {})
-        print(type(user))
-        print(user)
 
         serializer = self.serializer_class(data=user)
         serializer.is_valid(raise_exception=True)

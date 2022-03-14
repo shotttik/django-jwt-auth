@@ -104,7 +104,8 @@ class User(AbstractUser):
 
         token = jwt.encode({
             'id': self.pk,
-            'exp': int(dt.strftime('%s'))
+            'exp': int(dt.strftime('%s')),
+            'iat': datetime.now(),
         }, settings.SECRET_KEY, algorithm='HS256')
 
         return token

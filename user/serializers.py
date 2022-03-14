@@ -5,9 +5,6 @@ from .models import User
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
-
-    """Serializers registration requests and creates a new user."""
-
     password = serializers.CharField(
         max_length=128,
         min_length=8,
@@ -16,12 +13,12 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
     # The client should not be able to send a token along with a registration
     # request. Making `token` read-only handles that for us.
-    token = serializers.CharField(max_length=255, read_only=True)
+    # token = serializers.CharField(max_length=255, read_only=True)
 
     class Meta:
         model = User
 
-        fields = ['email', 'password', 'token']
+        fields = ['email', 'password']
 
     def create(self, validate_data):
         return User.objects.create_user(**validate_data)
