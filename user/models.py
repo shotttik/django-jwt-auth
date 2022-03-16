@@ -69,7 +69,7 @@ class User(AbstractUser):
         return self.email
 
     @property
-    def token(self):
+    def access_token(self):
         """
         Allows us to get a user's token by calling `user.token` instead of
         `user.generate_jwt_token().
@@ -78,6 +78,10 @@ class User(AbstractUser):
         a "dynamic property".
         """
         return self._generate_jwt_token()
+
+    @property
+    def refresh_token(self):
+        return self._generate_refresh_token()
 
     def get_full_name(self):
         """
@@ -97,8 +101,8 @@ class User(AbstractUser):
 
     def _generate_jwt_token(self):
         """
-        Generates a JSON Web Tokens that stores this user's ID and has an expiry
-        date set to 5 minutes into the future. refresh token expiry set to 7 days into the future
+        Generates a JSON Web Token that stores this user's ID and has an expiry
+        date set to 5 minutes into the future. 
         """
         dt_access = datetime.now() + timedelta(minutes=5)
 
@@ -107,7 +111,13 @@ class User(AbstractUser):
             'exp': int(dt_access.strftime('%s')),
             'iat': datetime.now(),
         }, settings.SECRET_KEY, algorithm='HS256')
+        return access_token
 
+    def _generate_refresh_token(self):
+        """
+        Generates a JSON Web Token that stores this user's ID and has an expiry
+        date set to 7 days into the future. 
+        """
         dt_refresh = datetime.now() + timedelta(days=7)
         refresh_token = jwt.encode({
             'id': self.pk,
@@ -115,7 +125,7 @@ class User(AbstractUser):
             'iat': datetime.now(),
         }, settings.SECRET_KEY, algorithm='HS256')
 
-        return {'access_token': access_token, 'refresh_token': refresh_token}
+        return refresh_token
 
     class Meta:
         verbose_name = 'User'

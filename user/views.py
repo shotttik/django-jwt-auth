@@ -62,7 +62,6 @@ class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
         serializer_data = request.data.get('user', {})
 
         # Here is that serialize, validate, save pattern
-
         serializer = self.serializer_class(
             request.user, data=serializer_data, partial=True
         )
@@ -70,3 +69,11 @@ class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
         serializer.save()
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class TokenRefreshAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
+    render_classes = (UserJSONRenderer,)
+
+    def post(self, request, *args, **kwargs):
+        pass
