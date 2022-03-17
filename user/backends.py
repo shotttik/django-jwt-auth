@@ -1,14 +1,8 @@
 import jwt
 from django.conf import settings
-from django.middleware.csrf import CsrfViewMiddleware
 from rest_framework import authentication, exceptions
 
 from .models import User
-
-# class CSRFCheck(CsrfViewMiddleware):
-#     def _reject(self, request, reason):
-#         # Return the failure reason instead of an HttpResponse
-#         return reason
 
 
 class JWTAuthentication(authentication.BaseAuthentication):
@@ -64,19 +58,4 @@ class JWTAuthentication(authentication.BaseAuthentication):
             msg = "This user has been deactivated"
             raise exceptions.AuthenticationFailed(msg)
 
-        # self.enforce_csrf(request)
-
         return (user, token)
-
-    # def enforce_csrf(self, request):
-    #     """
-    #     Enforce CSRF validation
-    #     """
-    #     check = CSRFCheck()
-    #     # populates request.META['CSRF_COOKIE'], which is used in process_view()
-    #     check.process_request(request)
-    #     reason = check.process_view(request, None, (), {})
-    #     print(reason)
-    #     if reason:
-    #         # CSRF failed, bail with explicit error message
-    #         raise exceptions.PermissionDenied('CSRF Failed: %s' % reason)

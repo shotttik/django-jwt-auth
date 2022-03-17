@@ -2,6 +2,8 @@ from os import access
 
 import jwt
 from django.conf import settings
+from django.middleware.csrf import get_token
+from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from rest_framework import exceptions, status
 from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
