@@ -72,12 +72,12 @@ class User(AbstractUser):
     def access_token(self):
         """
         Allows us to get a user's token by calling `user.token` instead of
-        `user.generate_jwt_token().
+        `user.generate_access_token().
 
         The `@property` decorator above makes this possible. `token` is called
         a "dynamic property".
         """
-        return self._generate_jwt_token()
+        return self._generate_access_token()
 
     @property
     def refresh_token(self):
@@ -99,7 +99,7 @@ class User(AbstractUser):
         """
         return self.username
 
-    def _generate_jwt_token(self):
+    def _generate_access_token(self):
         """
         Generates a JSON Web Token that stores this user's ID and has an expiry
         date set to 5 minutes into the future. 

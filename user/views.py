@@ -1,10 +1,13 @@
+from os import access
 
-
-from rest_framework import status
+import jwt
+from django.conf import settings
+from rest_framework import exceptions, status
 from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from user.models import User
 from user.serializers import LoginSerializer, RegistrationSerializer, UserSerializer
 
 from .renderers import UserJSONRenderer
@@ -37,7 +40,6 @@ class LoginAPIView(APIView):
         serializer.is_valid(raise_exception=True)
 
         response = Response()
-        response.set_cookie(key='access_token', value=serializer.data["access_token"], httponly=True)
         response.set_cookie(key='refresh_token', value=serializer.data["refresh_token"], httponly=True)
         response.data = serializer.data
         response.status = status.HTTP_200_OK
@@ -72,8 +74,32 @@ class UserRetrieveUpdateAPIView(RetrieveUpdateAPIView):
 
 
 class TokenRefreshAPIView(APIView):
-    permission_classes = (IsAuthenticated,)
-    render_classes = (UserJSONRenderer,)
+    permission_classes = (AllowAny,)
 
     def post(self, request, *args, **kwargs):
-        pass
+        refresh_token = request.COOKIES.get('refresh_token')
+
+        if refresh_token is None:
+            raise exceptions.AuthenticationFailed('Authentication credentials were not provided.')
+
+        try:
+            payload = jwt.decode(
+                refresh_token, settings.SECRET_KEY, algorithms=['HS256']
+            )
+        except jwt.ExpiredSignatureError:
+            raise exceptions.AuthenticationFailed(
+                'expired refresh token, please login again.'
+            )
+
+        user = User.objects.filter(
+            id=payload.get("id")
+        ).first()
+
+        if user is None:
+            raise exceptions.AuthenticationFailed('User not found')
+
+        if not user.is_active:
+            raise exceptions.AuthenticationFailed('User is deactivated')
+
+        access_token = user.access_token
+        return Response({"access_token": access_token}, status=status.HTTP_200_OK)
